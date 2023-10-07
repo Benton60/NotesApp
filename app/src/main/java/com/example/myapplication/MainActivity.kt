@@ -22,5 +22,4 @@ class MainActivity : AppCompatActivity() {
             textView.text = "bois"
         }
     }
-
 }
