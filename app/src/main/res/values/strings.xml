@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="hintForEdtNote">Enter your note here</string>
+    <string name="textForDeleteButton">Delete</string>
+    <string name="textForSaveButton">Save</string>
 </resources>
