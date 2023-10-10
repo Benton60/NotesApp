@@ -1,8 +1,8 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -11,15 +11,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
         btnBigBoi.setOnClickListener {
-            switchButton()
-        }
-    }
-    fun switchButton(){
-        val textView = findViewById<TextView>(R.id.textView)
-        if(textView.text.toString() == "bois"){
-            textView.text = "YUUUUUHHHH"
-        }else{
-            textView.text = "bois"
+            val intent = Intent(this, OpenNoteActivity::class.java)
+            startActivity(intent)
         }
     }
 }
