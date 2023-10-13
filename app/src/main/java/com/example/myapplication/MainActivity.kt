@@ -30,7 +30,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showFiles() {
+        val edtFileName = findViewById<EditText>(R.id.edtFileName)
         val tvListFiles = findViewById<TextView>(R.id.tvListFiles)
+
+        edtFileName.setText("")
         tvListFiles.text = ""
         var text = ""
         filesDir.listFiles()?.filter {
