@@ -16,10 +16,10 @@ class OpenNoteActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btnSave)
         val btnDelete = findViewById<Button>(R.id.btnDelete)
 
-        setText(loadThisNote("file.txt"))
+        setText(loadThisNote(getNoteName()))
 
         btnSave.setOnClickListener {
-            if(saveThisNote("file.txt")){
+            if(saveThisNote(getNoteName())){
                 finish()
             }else{
                 setText("Failed")
@@ -27,12 +27,12 @@ class OpenNoteActivity : AppCompatActivity() {
         }
 
         btnDelete.setOnClickListener {
-            deleteThisNote("file.txt")
+            deleteThisNote(getNoteName())
             finish()
         }
     }
-    fun getNoteName(){
-
+    private fun getNoteName(): String {
+         return intent.getStringExtra("EXTRA_FILENAME").toString()
     }
     private fun getText(): String {
         val edtNote = findViewById<EditText>(R.id.edtNote)
