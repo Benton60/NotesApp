@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "5199795270",
+    "project_id": "realnotesbackup",
+    "storage_bucket": "realnotesbackup.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5199795270:android:0cfad2f1c14841ea2ea647",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEjbhyFmuH_UN6Y1iaQTnfW_ytzl5zYOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

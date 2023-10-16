@@ -3,4 +3,7 @@
     <string name="hintForEdtNote">Enter your note here</string>
     <string name="textForDeleteButton">Delete</string>
     <string name="textForSaveButton">Save</string>
+    <string name="note_name_for_edtFileName">Note Name</string>
+    <string name="text_for_btnBigBoi">Open</string>
+    <string name="hint_for_tvListFiles">No Notes Yet</string>
 </resources>
