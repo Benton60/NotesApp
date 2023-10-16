@@ -49,10 +49,17 @@ class MainActivity : AppCompatActivity() {
                 .get()
                 .await()
             if (userQuery.documents.isNotEmpty()) {
+                val btnOpenNoteActivity = findViewById<Button>(R.id.btnBigBoi)
+                btnOpenNoteActivity.text = "True"
                 userExists = "true"
+            }else{
+                val btnOpenNoteActivity = findViewById<Button>(R.id.btnBigBoi)
+                btnOpenNoteActivity.text = "False"
+                userExists = "False"
             }
         }catch(e: Exception){
-
+            val btnOpenNoteActivity = findViewById<Button>(R.id.btnBigBoi)
+            btnOpenNoteActivity.text = "Failed"
         }
     }
 
