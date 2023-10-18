@@ -19,21 +19,24 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class OpenNoteActivity : AppCompatActivity() {
-    private val  usersRef = Firebase.firestore.collection("users")
-    private var userExists = "true"
+    private val usersRef = Firebase.firestore.collection("users")
+    private var currentUser = User(" ", " ", hashMapOf("" to ""), " ")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_note)
         val btnSave = findViewById<Button>(R.id.btnSave)
         val btnDelete = findViewById<Button>(R.id.btnDelete)
-        userExists = intent.getStringExtra("EXTRA_USER-EXISTS").toString()
+
+        updateUserInfo()
 
         setText(loadThisNote(getNoteName()))
 
         btnSave.setOnClickListener {
-            addDataToFireStore()
-            if(saveThisNote(getNoteName())){
 
+            if(saveThisNote(getNoteName())){
+                updateUserInfo()
+                updateDataToFireStore()
             }else{
                 setText("Failed")
             }
@@ -41,61 +44,30 @@ class OpenNoteActivity : AppCompatActivity() {
 
         btnDelete.setOnClickListener {
             deleteThisNote(getNoteName())
+            updateUserInfo()
+            updateDataToFireStore()
             finish()
         }
     }
-
-
-    private fun addDataToFireStore() = CoroutineScope(Dispatchers.IO).launch {
-        saveThisNote(getNoteName())
-        val db = Firebase.firestore
-        val notesToAddToDB = hashMapOf(
-            " " to " "
-        )
-        filesDir.listFiles()?.filter {
-            it.canRead()
-            it.isFile
-            it.canWrite()
-            it.exists()
-            it.extension == "note"
-        }?.forEach {
-            notesToAddToDB.put(it.name, loadThisNote(it.name))
-        }
-        notesToAddToDB.remove(" ")
-        if(userExists.equals("true")){
-            val user = usersRef
-                .whereEqualTo("user", intent.getStringExtra("EXTRA_USERNAME").toString())
-                .get()
-                .await()
+    private fun updateDataToFireStore() = CoroutineScope(Dispatchers.IO).launch {
+        val user = usersRef
+            .whereEqualTo("name", currentUser.name)
+            .get()
+            .await()
+        if(!user.isEmpty){
             for (document in user){
-                usersRef.document("lastTime").set (
-                    SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date()),
-                    SetOptions.merge()
-                ).await()
-                usersRef.document("notes").set(
-                    notesToAddToDB,
+                usersRef.document(document.id).set (
+                    currentUser.getHashMapOf(),
                     SetOptions.merge()
                 ).await()
             }
         }else {
-            val user = hashMapOf(
-                "user" to intent.getStringExtra("EXTRA_USERNAME").toString(),
-                "password" to intent.getStringExtra("EXTRA_PASSWORD").toString(),
-                "lastTime" to SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date()),
-                "notes" to notesToAddToDB
-            )
-            //val toast = Toast.makeText(this, "Connect To The Internet", Toast.LENGTH_SHORT)
-            //toast.show()
+            val db = Firebase.firestore
             db.collection("users")
-                .add(user)
-                .addOnSuccessListener {
-                    //val toast = Toast.makeText(this, "Saved", Toast.LENGTH_LONG)
-                    //toast.show()
-                }
+                .add(currentUser.getHashMapOf())
         }
         finish()
     }
-
     private fun getNoteName(): String {
          return intent.getStringExtra("EXTRA_FILENAME").toString()
     }
@@ -137,5 +109,25 @@ class OpenNoteActivity : AppCompatActivity() {
         }catch(e: IOException){
             ""
         }
+    }
+    private fun updateUserInfo(){
+        currentUser.name = intent.getStringExtra("EXTRA_USERNAME").toString()
+        currentUser.password = intent.getStringExtra("EXTRA_PASSWORD").toString()
+        currentUser.lastTime  = SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
+
+        val notesToAddToUser = hashMapOf<String, Any>(
+            " " to " "
+        )
+        filesDir.listFiles()?.filter {
+            it.canRead()
+            it.isFile
+            it.canWrite()
+            it.exists()
+            it.extension == "note"
+        }?.forEach {
+            notesToAddToUser[it.name] = loadThisNote(it.name)
+        }
+        notesToAddToUser.remove(" ")
+        currentUser.notes = notesToAddToUser
     }
 }
