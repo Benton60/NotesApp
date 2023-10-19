@@ -6,11 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
-    private val  usersRef = Firebase.firestore.collection("users")
     private val userName = "Admin"
     private val password = "Admin"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +16,14 @@ class MainActivity : AppCompatActivity() {
 
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
+
+
         showFiles()
+
+        btnLogin.setOnClickListener {
+            login()
+        }
         btnBigBoi.setOnClickListener {
             Intent(this, OpenNoteActivity::class.java).also {
                 it.putExtra("EXTRA_FILENAME", edtFileName.text.toString() + ".note")
@@ -32,6 +36,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         showFiles()
+    }
+    private fun login(){
+        Intent(this, LoginActivity::class.java).also{
+            startActivity(it)
+        }
     }
     private fun showFiles() {
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
