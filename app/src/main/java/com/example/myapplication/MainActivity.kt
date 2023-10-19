@@ -25,11 +25,13 @@ class MainActivity : AppCompatActivity() {
             login()
         }
         btnBigBoi.setOnClickListener {
-            Intent(this, OpenNoteActivity::class.java).also {
-                it.putExtra("EXTRA_FILENAME", edtFileName.text.toString() + ".note")
-                it.putExtra("EXTRA_USERNAME", userName)
-                it.putExtra("EXTRA_PASSWORD", password)
-                startActivity(it)
+            if(edtFileName.text.toString() != "") {
+                Intent(this, OpenNoteActivity::class.java).also {
+                    it.putExtra("EXTRA_FILENAME", edtFileName.text.toString() + ".note")
+                    it.putExtra("EXTRA_USERNAME", userName)
+                    it.putExtra("EXTRA_PASSWORD", password)
+                    startActivity(it)
+                }
             }
         }
     }
