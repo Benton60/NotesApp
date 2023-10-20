@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -21,13 +22,21 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         val btnBack = findViewById<Button>(R.id.btnBack)
         val btnCheck = findViewById<Button>(R.id.btnCheck)
+        val btnCreateUser = findViewById<Button>(R.id.btnCreateUser)
 
         btnBack.setOnClickListener {
+            deleteUserInfo()
             finish()
         }
 
         btnCheck.setOnClickListener {
             checkUserLoginInfo()
+        }
+
+        btnCreateUser.setOnClickListener {
+            Intent(this, CreateUserActivity::class.java).also{
+                startActivity(it)
+            }
         }
     }
     private fun checkUserLoginInfo() = CoroutineScope(Dispatchers.IO).launch{
@@ -41,12 +50,9 @@ class LoginActivity : AppCompatActivity() {
             .get()
             .await()
         if(user.isEmpty){
-            try{
-                deleteFile("userPassword.usr")
-                deleteFile("userUsername.usr")
-            }catch(e: Exception){
-                print("e")
-            }
+            deleteUserInfo()
+            edtPassword.setText("")
+
             withContext(Dispatchers.Main){
                 Toast.makeText(this@LoginActivity, "Invalid Password", Toast.LENGTH_LONG).show()
             }
@@ -59,7 +65,6 @@ class LoginActivity : AppCompatActivity() {
         val edtPassword = findViewById<EditText>(R.id.edtPassword)
         val edtUsername = findViewById<EditText>(R.id.edtUsername)
         try{
-
             val fileOutputStream = openFileOutput("userPassword.usr", MODE_PRIVATE)
             val outputWriter = OutputStreamWriter(fileOutputStream)
             outputWriter.write(edtPassword.text.toString())
@@ -70,6 +75,14 @@ class LoginActivity : AppCompatActivity() {
             outputWriter2.write(edtUsername.text.toString())
             outputWriter2.close()
         }catch(e: IOException){
+            println(e)
+        }
+    }
+    private fun deleteUserInfo(){
+        try {
+            deleteFile("userPassword.usr")
+            deleteFile("userUsername.usr")
+        }catch(e: Exception){
             println(e)
         }
     }

@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -45,7 +46,7 @@ class OpenNoteActivity : AppCompatActivity() {
                 updateUserInfo()
                 updateDataToFireStore()
             }else{
-                setText("Failed")
+                Toast.makeText(this, "Could Not Save File", Toast.LENGTH_LONG)
             }
         }
 
@@ -65,6 +66,9 @@ class OpenNoteActivity : AppCompatActivity() {
                     .await()
                 if (!user.isEmpty) {
                     for (document in user) {
+                        usersRef.document(document.id).update(mapOf(
+                            "notes" to FieldValue.delete()
+                        ))
                         usersRef.document(document.id).set(
                             currentUser.getHashMapOf(),
                             SetOptions.merge()
@@ -100,6 +104,11 @@ class OpenNoteActivity : AppCompatActivity() {
     }
     private fun saveThisNote(noteName: String): Boolean{
         return try{
+            val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
+            val timeOutputWriter = OutputStreamWriter(timeFileStream)
+            timeOutputWriter.write(SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date()))
+            timeOutputWriter.close()
+
             val fileOutputStream = openFileOutput(noteName, MODE_PRIVATE)
             val outputWriter = OutputStreamWriter(fileOutputStream)
             outputWriter.write(getText())
