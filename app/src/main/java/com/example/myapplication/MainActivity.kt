@@ -11,10 +11,19 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.io.IOException
+import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
-    private val userName = "Admin"
-    private val password = "Admin"
+    var isNotUpToDate = false
+    private val usersRef = Firebase.firestore.collection("users")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         showFiles()
         checkIfLoggedIn()
+        checkIfUpToDate()
         btnLogin.setOnClickListener {
             login()
         }
@@ -32,8 +42,6 @@ class MainActivity : AppCompatActivity() {
             if(edtFileName.text.toString() != "") {
                 Intent(this, OpenNoteActivity::class.java).also {
                     it.putExtra("EXTRA_FILENAME", edtFileName.text.toString() + ".note")
-                    it.putExtra("EXTRA_USERNAME", userName)
-                    it.putExtra("EXTRA_PASSWORD", password)
                     startActivity(it)
                 }
             }else{
@@ -45,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         checkIfLoggedIn()
         showFiles()
+        checkIfUpToDate()
     }
     private fun login(){
         Intent(this, LoginActivity::class.java).also{
@@ -52,22 +61,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun showFiles() {
-        val edtFileName = findViewById<EditText>(R.id.edtFileName)
-        val tvListFiles = findViewById<TextView>(R.id.tvListFiles)
-
-        edtFileName.setText("")
-        tvListFiles.text = ""
-        var text = ""
-        filesDir.listFiles()?.filter {
-            it.canRead()
-            it.isFile
-            it.canWrite()
-            it.exists()
-            it.extension == "note"
-        }?.forEach {
-            text += "\n" + it.nameWithoutExtension
+        if(checkForInternet(this) && isNotUpToDate){
+            pullFilesFromServer()
+        }else{
+            pullFilesFromLocalMachine()
         }
-        tvListFiles.text = text
+
     }
     private fun checkIfLoggedIn(){
         val btnLogin = findViewById<Button>(R.id.btnLogin)
@@ -120,5 +119,73 @@ class MainActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             return networkInfo.isConnected
         }
+    }
+    private fun checkIfUpToDate() = CoroutineScope(Dispatchers.IO).launch{
+        var localTime = ""
+        var serverTime = ""
+        val querySnapshot = usersRef.get().await()
+        for(document in querySnapshot.documents){
+            serverTime = document.get("lastTime").toString()
+        }
+        try {
+            val fileInputStream = openFileInput("")
+            val inputReader = InputStreamReader(fileInputStream)
+            localTime = inputReader.readText()
+        }catch(e: Exception){
+            localTime = " "
+            isNotUpToDate = true
+        }
+
+        try{
+            if(serverTime.substring(6,10).toInt() > localTime.substring(6,10).toInt()){
+                isNotUpToDate = true
+            }else if(serverTime.substring(3,5).toInt() > localTime.substring(3,5).toInt()){
+                isNotUpToDate = true
+            }else if(serverTime.substring(0,2).toInt() > localTime.substring(0,2).toInt()){
+                isNotUpToDate = true
+            }else if(serverTime.substring(11, 13).toInt() > localTime.substring(11, 13).toInt()){
+                isNotUpToDate = true
+            }else  if(serverTime.substring(14, 16).toInt() > localTime.substring(14, 16).toInt()){
+                isNotUpToDate = true
+            }else  if(serverTime.substring(17, 19).toInt() > localTime.substring(17, 19).toInt()){
+                isNotUpToDate = true
+            }else{
+                isNotUpToDate = false
+            }
+        }catch(e: Exception){
+            isNotUpToDate = false
+            finish()
+        }
+    }//    "dd/MM/yyyy hh:mm:ss"
+    private fun loadThisNote(noteName: String): String {
+        return try {
+            val fileInputStream = openFileInput(noteName)
+            val inputReader = InputStreamReader(fileInputStream)
+            val output = inputReader.readText()
+            output
+        }catch(e: IOException){
+            ""
+        }
+    }
+    private fun pullFilesFromServer(){
+
+    }
+    private fun pullFilesFromLocalMachine(){
+        val edtFileName = findViewById<EditText>(R.id.edtFileName)
+        val tvListFiles = findViewById<TextView>(R.id.tvListFiles)
+
+        edtFileName.setText("")
+        tvListFiles.text = ""
+        var text = ""
+        filesDir.listFiles()?.filter {
+            it.canRead()
+            it.isFile
+            it.canWrite()
+            it.exists()
+            it.extension == "note"
+        }?.forEach {
+            text += "\n" + it.nameWithoutExtension
+        }
+        tvListFiles.text = text
     }
 }

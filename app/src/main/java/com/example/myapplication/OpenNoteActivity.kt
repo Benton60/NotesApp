@@ -106,7 +106,7 @@ class OpenNoteActivity : AppCompatActivity() {
         return try{
             val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
             val timeOutputWriter = OutputStreamWriter(timeFileStream)
-            timeOutputWriter.write(SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date()))
+            timeOutputWriter.write(SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date()))
             timeOutputWriter.close()
 
             val fileOutputStream = openFileOutput(noteName, MODE_PRIVATE)
@@ -140,8 +140,8 @@ class OpenNoteActivity : AppCompatActivity() {
     }
     private fun updateUserInfo(){
         checkUserLoginInfo()
-        currentUser.name = loadThisNote("userPassword.usr")
-        currentUser.password = loadThisNote("userUsername.usr")
+        currentUser.name = loadThisNote("userUsername.usr")
+        currentUser.password = loadThisNote("userPassword.usr")
         currentUser.lastTime  = SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
 
         val notesToAddToUser = hashMapOf<String, Any>(

@@ -69,7 +69,7 @@ class CreateUserActivity : AppCompatActivity() {
     private fun updateUserInfo(username: String, password: String){
         userToCreate.name = username
         userToCreate.password = password
-        userToCreate.lastTime  = SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
+        userToCreate.lastTime  = SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date())
 
         val notesToAddToUser = hashMapOf<String, Any>(
             " " to " "

@@ -8,14 +8,14 @@ class User (
     var name: String = "",
     var password: String = "",
     var notes: HashMap<String, Any>,
-    var lastTime: String = SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
+    var lastTime: String = SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date())
 ){
     fun getHashMapOf(): HashMap<String, Any> {
         return hashMapOf(
             "name" to name,
             "password" to password,
             "notes" to notes,
-            "lastTime" to SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
+            "lastTime" to SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date())
         )
     }
 }
