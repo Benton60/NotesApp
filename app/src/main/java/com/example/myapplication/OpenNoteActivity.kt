@@ -142,7 +142,6 @@ class OpenNoteActivity : AppCompatActivity() {
         checkUserLoginInfo()
         currentUser.name = loadThisNote("userUsername.usr")
         currentUser.password = loadThisNote("userPassword.usr")
-        currentUser.lastTime  = SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Date())
 
         val notesToAddToUser = hashMapOf<String, Any>(
             " " to " "

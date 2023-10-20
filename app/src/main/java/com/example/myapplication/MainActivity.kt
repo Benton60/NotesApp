@@ -17,8 +17,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     var isNotUpToDate = false
@@ -32,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
 
-        showFiles()
+
         checkIfLoggedIn()
         checkIfUpToDate()
         btnLogin.setOnClickListener {
@@ -52,7 +56,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkIfLoggedIn()
-        showFiles()
         checkIfUpToDate()
     }
     private fun login(){
@@ -60,13 +63,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(it)
         }
     }
-    private fun showFiles() {
-        if(checkForInternet(this) && isNotUpToDate){
+    private fun showFiles(context: Context) {
+        if(checkForInternet(context) && isNotUpToDate){
             pullFilesFromServer()
-        }else{
+        }else {
             pullFilesFromLocalMachine()
         }
-
     }
     private fun checkIfLoggedIn(){
         val btnLogin = findViewById<Button>(R.id.btnLogin)
@@ -83,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun checkForInternet(context: Context): Boolean {
-
         // register activity with the connectivity manager service
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -121,21 +122,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun checkIfUpToDate() = CoroutineScope(Dispatchers.IO).launch{
-        var localTime = ""
+        var localTime: String
         var serverTime = ""
-        val querySnapshot = usersRef.get().await()
+        val querySnapshot = usersRef
+            .whereEqualTo("name", loadThisNote("userUsername.usr"))
+            .get()
+            .await()
+
         for(document in querySnapshot.documents){
             serverTime = document.get("lastTime").toString()
         }
-        try {
-            val fileInputStream = openFileInput("")
-            val inputReader = InputStreamReader(fileInputStream)
-            localTime = inputReader.readText()
-        }catch(e: Exception){
-            localTime = " "
-            isNotUpToDate = true
-        }
 
+        localTime = loadThisNote("lastTime.tim")
         try{
             if(serverTime.substring(6,10).toInt() > localTime.substring(6,10).toInt()){
                 isNotUpToDate = true
@@ -154,9 +152,14 @@ class MainActivity : AppCompatActivity() {
             }
         }catch(e: Exception){
             isNotUpToDate = false
-            finish()
         }
+        withContext(Dispatchers.Main) {
+            showFiles(this@MainActivity)
+        }
+        //val btn = findViewById<Button>(R.id.btnBigBoi)
+       // btn.setText(isNotUpToDate.toString() + "\n" +serverTime + "\n" + localTime)
     }//    "dd/MM/yyyy hh:mm:ss"
+    //      0123456789012345678
     private fun loadThisNote(noteName: String): String {
         return try {
             val fileInputStream = openFileInput(noteName)
@@ -167,8 +170,26 @@ class MainActivity : AppCompatActivity() {
             ""
         }
     }
-    private fun pullFilesFromServer(){
-
+    private fun pullFilesFromServer() = CoroutineScope(Dispatchers.IO).launch{
+        try {
+            val user = usersRef
+                .whereEqualTo("name", loadThisNote("userUsername.usr"))
+                .get()
+                .await()
+            var documentsFromServer = hashMapOf<String, Any>(
+                " " to " "
+            )
+            for (document in user.documents) {
+                documentsFromServer = document.get("notes") as HashMap<String, Any>
+            }
+            documentsFromServer.forEach { (name, contents) ->
+                saveThisNote(name, contents.toString())
+            }
+            pullFilesFromLocalMachine()
+        }catch (e: Exception){
+            val btn = findViewById<Button>(R.id.btnBigBoi)
+            btn.setText(e.toString())
+        }
     }
     private fun pullFilesFromLocalMachine(){
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
@@ -186,6 +207,21 @@ class MainActivity : AppCompatActivity() {
         }?.forEach {
             text += "\n" + it.nameWithoutExtension
         }
-        tvListFiles.text = text
+        tvListFiles.setText(text)
+    }
+    private fun saveThisNote(noteName: String, noteContents: String){
+        try{
+            val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
+            val timeOutputWriter = OutputStreamWriter(timeFileStream)
+            timeOutputWriter.write(SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date()))
+            timeOutputWriter.close()
+
+            val fileOutputStream = openFileOutput(noteName, MODE_PRIVATE)
+            val outputWriter = OutputStreamWriter(fileOutputStream)
+            outputWriter.write(noteContents)
+            outputWriter.close()
+        }catch(e: IOException){
+            println(e)
+        }
     }
 }
