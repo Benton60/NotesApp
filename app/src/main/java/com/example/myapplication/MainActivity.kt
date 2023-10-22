@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             login()
         }
+        edtFileName.setOnClickListener{
+            showFiles()
+        }
         btnBigBoi.setOnClickListener {
             if(edtFileName.text.toString() != "") {
                 Intent(this, OpenNoteActivity::class.java).also {
@@ -54,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkIfLoggedIn()
+        showFiles()
     }
     private fun login(){
         Intent(this, LoginActivity::class.java).also{
@@ -61,15 +65,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun showFiles(){
-        var notyet = !isfinished
-        while(notyet){
-            notyet = !isfinished
-        }
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
+        btnbigboi.text = serverTime
+        pullServerTime()
         if(checkForInternet(this) && isServerTimeHigher()){
             pullFilesFromServer()
-        }else{
-            pullFilesFromLocalMachine()
         }
+        pullFilesFromLocalMachine()
     }
     private fun checkIfLoggedIn(){
         val btnLogin = findViewById<Button>(R.id.btnLogin)
@@ -146,16 +149,25 @@ class MainActivity : AppCompatActivity() {
                 .whereEqualTo("name", loadThisNote("userUsername.usr"))
                 .get()
                 .await()
+            filesDir.listFiles().filter{
+                it.isFile
+                it.exists()
+                it.extension == "note"
+            }.forEach{
+                deleteFile(it.name)
+            }
             for(user in user.documents){
-                val notesFromServer: HashMap<String, Any> = user.get("notes") as HashMap<String, Any>
-                notesFromServer.forEach{(note, contents) ->
-                    saveThisNote(note, contents.toString())
+
+                val notesFromServer = user.get("notes") as HashMap<String, Any>
+
+                notesFromServer.forEach{
+                    saveThisNote(it.key, it.value.toString())
                 }
             }
         }catch(e: Exception){
-
+            var btn = findViewById<Button>(R.id.btnBigBoi)
+            btn.text = "Error"
         }
-        pullFilesFromLocalMachine()
     }
     private fun loadThisNote(noteName: String): String {
         return try {
@@ -182,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         isfinished = true
     }
     private fun isServerTimeHigher(): Boolean{
-        var localTime = ""
+        var localTime = "00000000000000000000"
         filesDir.listFiles().filter{
             it.extension == "tim"
         }.forEach{
@@ -200,6 +212,33 @@ class MainActivity : AppCompatActivity() {
             }else  if(serverTime.substring(14, 16).toInt() > localTime.substring(14, 16).toInt()){
                 return true
             }else  if(serverTime.substring(17, 19).toInt() > localTime.substring(17, 19).toInt()){
+                return true
+            }else{
+                return false
+            }
+        }catch(e: Exception){
+            return false
+        }
+    }
+    private fun isServerTimeLower(): Boolean{
+        var localTime = "00000000000000000000"
+        filesDir.listFiles().filter{
+            it.extension == "tim"
+        }.forEach{
+            localTime = loadThisNote(it.name)
+        }
+        try{
+            if(serverTime.substring(6,10).toInt() < localTime.substring(6,10).toInt()){
+                return true
+            }else if(serverTime.substring(3,5).toInt() < localTime.substring(3,5).toInt()){
+                return true
+            }else if(serverTime.substring(0,2).toInt() < localTime.substring(0,2).toInt()){
+                return true
+            }else if(serverTime.substring(11, 13).toInt() < localTime.substring(11, 13).toInt()){
+                return true
+            }else  if(serverTime.substring(14, 16).toInt() < localTime.substring(14, 16).toInt()){
+                return true
+            }else  if(serverTime.substring(17, 19).toInt() < localTime.substring(17, 19).toInt()){
                 return true
             }else{
                 return false

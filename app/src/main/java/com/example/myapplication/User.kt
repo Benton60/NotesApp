@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 
-class User (
-    var name: String = "",
+class User(
+    var name: String= "",
     var password: String = "",
     var notes: HashMap<String, Any>,
     var lastTime: String = SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date())
