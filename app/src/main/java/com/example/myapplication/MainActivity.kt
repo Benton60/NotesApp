@@ -11,12 +11,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -65,12 +68,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun showFiles(){
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
-        btnbigboi.text = serverTime
+        //var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
+        //btnbigboi.text = isServerTimeHigher().toString()
         pullServerTime()
         if(checkForInternet(this) && isServerTimeHigher()){
             pullFilesFromServer()
+        }else{
+            userIsAhead()
         }
         pullFilesFromLocalMachine()
     }
@@ -220,33 +224,6 @@ class MainActivity : AppCompatActivity() {
             return false
         }
     }
-    private fun isServerTimeLower(): Boolean{
-        var localTime = "00000000000000000000"
-        filesDir.listFiles().filter{
-            it.extension == "tim"
-        }.forEach{
-            localTime = loadThisNote(it.name)
-        }
-        try{
-            if(serverTime.substring(6,10).toInt() < localTime.substring(6,10).toInt()){
-                return true
-            }else if(serverTime.substring(3,5).toInt() < localTime.substring(3,5).toInt()){
-                return true
-            }else if(serverTime.substring(0,2).toInt() < localTime.substring(0,2).toInt()){
-                return true
-            }else if(serverTime.substring(11, 13).toInt() < localTime.substring(11, 13).toInt()){
-                return true
-            }else  if(serverTime.substring(14, 16).toInt() < localTime.substring(14, 16).toInt()){
-                return true
-            }else  if(serverTime.substring(17, 19).toInt() < localTime.substring(17, 19).toInt()){
-                return true
-            }else{
-                return false
-            }
-        }catch(e: Exception){
-            return false
-        }
-    }
     private fun saveThisNote(note: String, contents: String){
         try{
             val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
@@ -261,6 +238,46 @@ class MainActivity : AppCompatActivity() {
         }catch(e: IOException){
             println(e)
         }
+    }
+    private fun userIsAhead() = CoroutineScope(Dispatchers.IO).launch{
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        withContext(Dispatchers.Main) {
+            if (checkForInternet(this@MainActivity) && btnLogin.text == "Signed In") {
+                val user = usersRef
+                    .whereEqualTo("name", loadThisNote("userUsername.usr"))
+                    .get()
+                    .await()
+                if (!user.isEmpty) {
+                    for (document in user) {
+                        usersRef.document(document.id).update(mapOf(
+                            "notes" to FieldValue.delete()
+                        ))
+                        usersRef.document(document.id).set(
+                            hashMapOf<String, Any>(
+                                "notes" to getHashMapOfNotes()
+                            ),
+                            SetOptions.merge()
+                        ).await()
+                    }
+                }
+            }
+        }
+    }
+    private fun getHashMapOfNotes(): HashMap<String, Any>{
+        var notes = hashMapOf<String, Any>(
+            " " to " "
+        )
+        filesDir.listFiles()?.filter {
+            it.canRead()
+            it.isFile
+            it.canWrite()
+            it.exists()
+            it.extension == "note"
+        }?.forEach {
+            notes[it.name] = loadThisNote(it.name)
+        }
+        notes.remove(" ")
+        return notes
     }
 }
 
