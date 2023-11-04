@@ -66,5 +66,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageButton
+        android:id="@+id/btnSettings"
+        android:layout_width="71dp"
+        android:layout_height="71dp"
+        android:layout_marginBottom="10dp"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnBigBoi"
+        app:srcCompat="@drawable/th" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

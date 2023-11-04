@@ -54,7 +54,6 @@ class OpenNoteActivity : AppCompatActivity() {
             deleteThisNote(getNoteName())
             updateUserInfo()
             updateDataToFireStore()
-            finish()
         }
     }
     private fun updateDataToFireStore() = CoroutineScope(Dispatchers.IO).launch {
@@ -79,6 +78,10 @@ class OpenNoteActivity : AppCompatActivity() {
                     db.collection("users")
                         .add(currentUser.getHashMapOf())
                 }
+                val fileOutputStream = openFileOutput("userLastUsed.sys", MODE_PRIVATE)
+                val outputWriter = OutputStreamWriter(fileOutputStream)
+                outputWriter.write(loadThisNote("userUsername.usr"))
+                outputWriter.close()
             } else {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(

@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,9 +36,13 @@ class MainActivity : AppCompatActivity() {
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
 
-
-
+        btnSettings.setOnClickListener {
+            Intent(this, SettingsActivity::class.java).also{
+                startActivity(it)
+            }
+        }
         checkIfLoggedIn()
         btnLogin.setOnClickListener {
             login()
@@ -71,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         //var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
         //btnbigboi.text = isServerTimeHigher().toString()
         pullServerTime()
-        if(checkForInternet(this) && isServerTimeHigher()){
+        if(checkForInternet(this) && (isServerTimeHigher() || loadThisNote("userLastUsed.sys") != loadThisNote("userUsername.usr"))){
             pullFilesFromServer()
         }else{
             userIsAhead()
@@ -242,7 +247,7 @@ class MainActivity : AppCompatActivity() {
     private fun userIsAhead() = CoroutineScope(Dispatchers.IO).launch{
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         withContext(Dispatchers.Main) {
-            if (checkForInternet(this@MainActivity) && btnLogin.text == "Signed In") {
+            if ((checkForInternet(this@MainActivity) && btnLogin.text == "Signed In") && (loadThisNote("userLastUsed.sys") == loadThisNote("userUsername.usr"))) {
                 val user = usersRef
                     .whereEqualTo("name", loadThisNote("userUsername.usr"))
                     .get()
