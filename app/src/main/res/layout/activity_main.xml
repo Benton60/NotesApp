@@ -67,6 +67,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
+        android:contentDescription="Settings Icon"
         android:id="@+id/btnSettings"
         android:layout_width="71dp"
         android:layout_height="71dp"
