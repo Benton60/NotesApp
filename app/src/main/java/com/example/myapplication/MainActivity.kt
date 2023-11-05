@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -39,13 +40,26 @@ class MainActivity : AppCompatActivity() {
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
         val ltvFilesList = findViewById<ListView>(R.id.ltvFilesList)
+        checkIfLoggedIn()
 
+
+
+
+        ltvFilesList.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            if(parent.getItemAtPosition(position).toString() != "") {
+                Intent(this, OpenNoteActivity::class.java).also {
+                    it.putExtra("EXTRA_FILENAME", parent.getItemAtPosition(position).toString() + ".note")
+                    startActivity(it)
+                }
+            }else{
+                Toast.makeText(this, "Please Enter A File Name", Toast.LENGTH_SHORT).show()
+            }
+        }
         btnSettings.setOnClickListener {
             Intent(this, SettingsActivity::class.java).also{
                 startActivity(it)
             }
         }
-        checkIfLoggedIn()
         btnLogin.setOnClickListener {
             login()
         }
