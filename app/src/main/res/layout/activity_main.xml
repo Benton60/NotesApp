@@ -7,18 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btnBigBoi"
-        android:layout_width="149dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="10dp"
-        android:textSize="10sp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:text="@string/text_for_btnBigBoi"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/edtFileName"
@@ -34,27 +22,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
+    <ListView
+        android:id="@+id/ltvFilesList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        app:layout_constraintBottom_toTopOf="@id/btnBigBoi"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtFileName"
-        app:layout_constraintVertical_bias="0.5">
+        app:layout_constraintTop_toBottomOf="@id/edtFileName"
+        app:layout_constraintVertical_bias="0.0" />
 
-        <TextView
-            android:id="@+id/tvListFiles"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="@string/hint_for_tvListFiles"
-            android:text=""
-            android:textSize="20sp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"/>
-    </ScrollView>
+    <Button
+        android:id="@+id/btnBigBoi"
+        android:layout_width="149dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/text_for_btnBigBoi"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnLogin"
@@ -67,12 +58,12 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
-        android:contentDescription="Settings Icon"
         android:id="@+id/btnSettings"
         android:layout_width="71dp"
         android:layout_height="71dp"
         android:layout_marginBottom="10dp"
         android:adjustViewBounds="true"
+        android:contentDescription="Settings Icon"
         android:cropToPadding="false"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"

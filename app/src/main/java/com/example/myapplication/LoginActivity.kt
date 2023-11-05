@@ -82,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
         try {
             deleteFile("userPassword.usr")
             deleteFile("userUsername.usr")
+            deleteFile("userLastUsed.sys")
         }catch(e: Exception){
             println(e)
         }

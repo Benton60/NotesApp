@@ -6,10 +6,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FieldValue
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
+        val ltvFilesList = findViewById<ListView>(R.id.ltvFilesList)
 
         btnSettings.setOnClickListener {
             Intent(this, SettingsActivity::class.java).also{
@@ -136,11 +138,11 @@ class MainActivity : AppCompatActivity() {
     }
     private fun pullFilesFromLocalMachine(){
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
-        val tvListFiles = findViewById<TextView>(R.id.tvListFiles)
+        val ltvFilesList = findViewById<ListView>(R.id.ltvFilesList)
 
         edtFileName.setText("")
-        tvListFiles.text = ""
-        var text = ""
+        var filesList = mutableListOf<String>()
+
         filesDir.listFiles()?.filter {
             it.canRead()
             it.isFile
@@ -148,9 +150,10 @@ class MainActivity : AppCompatActivity() {
             it.exists()
             it.extension == "note"
         }?.forEach {
-            text += "\n" + it.nameWithoutExtension
+            filesList.add(it.nameWithoutExtension)
         }
-        tvListFiles.text = text
+        val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, filesList)
+        ltvFilesList.adapter = arrayAdapter
     }
     private fun pullFilesFromServer() = CoroutineScope(Dispatchers.IO).launch{
         try{
