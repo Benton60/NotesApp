@@ -32,20 +32,55 @@
                 android:text="Delete My Account"
                 android:visibility="visible"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                />
+                android:layout_marginTop="10dp" />
+
+
+
         </LinearLayout>
     </ScrollView>
-
-    <Button
-        android:id="@+id/btnSettingsBack"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="10dp"
-        android:text="Back"
+        android:background="@drawable/round"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <Button
+                android:id="@+id/btnSettingsBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerInParent="true"
+                android:backgroundTint="@color/grey"
+                android:text="Back"
+                android:textColor="@color/black" />
+
+
+            <Button
+                android:id="@+id/btnLoginSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/grey"
+                android:text="Login"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

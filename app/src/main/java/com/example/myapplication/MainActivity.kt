@@ -37,11 +37,8 @@ class MainActivity : AppCompatActivity() {
         pullServerTime()
         val edtFileName = findViewById<EditText>(R.id.edtFileName)
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
         val ltvFilesList = findViewById<ListView>(R.id.ltvFilesList)
-        checkIfLoggedIn()
-
 
 
 
@@ -60,9 +57,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
-        btnLogin.setOnClickListener {
-            login()
-        }
         edtFileName.setOnClickListener{
             showFiles()
         }
@@ -80,38 +74,18 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        checkIfLoggedIn()
         showFiles()
-    }
-    private fun login(){
-        Intent(this, LoginActivity::class.java).also{
-            startActivity(it)
-        }
     }
     private fun showFiles(){
         //var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
         //btnbigboi.text = isServerTimeHigher().toString()
         pullServerTime()
-        if(checkForInternet(this) && (isServerTimeHigher() || loadThisNote("userLastUsed.sys") != loadThisNote("userUsername.usr"))){
+        if(checkForInternet(this) && isServerTimeHigher()){
             pullFilesFromServer()
         }else{
             userIsAhead()
         }
         pullFilesFromLocalMachine()
-    }
-    private fun checkIfLoggedIn(){
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        btnLogin.text = "Login"
-        filesDir.listFiles().filter{
-            it.isFile
-            it.canRead()
-            it.exists()
-            it.extension == "usr"
-        }.forEach{
-            if(it.nameWithoutExtension == "userPassword") {
-                btnLogin.text = "Signed In"
-            }
-        }
     }
     private fun checkForInternet(context: Context): Boolean {
         // register activity with the connectivity manager service
@@ -220,6 +194,9 @@ class MainActivity : AppCompatActivity() {
         isfinished = true
     }
     private fun isServerTimeHigher(): Boolean{
+        if(pullServerTime().isActive){
+            return false
+        }
         var localTime = "00000000000000000000"
         filesDir.listFiles().filter{
             it.extension == "tim"
@@ -227,20 +204,20 @@ class MainActivity : AppCompatActivity() {
             localTime = loadThisNote(it.name)
         }
         try{
-            if(serverTime.substring(6,10).toInt() > localTime.substring(6,10).toInt()){
-                return true
+            return if(serverTime.substring(6,10).toInt() > localTime.substring(6,10).toInt()){
+                true
             }else if(serverTime.substring(3,5).toInt() > localTime.substring(3,5).toInt()){
-                return true
+                true
             }else if(serverTime.substring(0,2).toInt() > localTime.substring(0,2).toInt()){
-                return true
+                true
             }else if(serverTime.substring(11, 13).toInt() > localTime.substring(11, 13).toInt()){
-                return true
+                true
             }else  if(serverTime.substring(14, 16).toInt() > localTime.substring(14, 16).toInt()){
-                return true
+                true
             }else  if(serverTime.substring(17, 19).toInt() > localTime.substring(17, 19).toInt()){
-                return true
+                true
             }else{
-                return false
+                false
             }
         }catch(e: Exception){
             return false
@@ -262,9 +239,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun userIsAhead() = CoroutineScope(Dispatchers.IO).launch{
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
         withContext(Dispatchers.Main) {
-            if ((checkForInternet(this@MainActivity) && btnLogin.text == "Signed In") && (loadThisNote("userLastUsed.sys") == loadThisNote("userUsername.usr"))) {
+            if (checkForInternet(this@MainActivity) && loadThisNote("userPassword.usr") != "") {
                 val user = usersRef
                     .whereEqualTo("name", loadThisNote("userUsername.usr"))
                     .get()

@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">My Application</string>
+
+
+
+
+    <!-- Strings for Xml-->
     <string name="hintForEdtNote">Enter your note here</string>
     <string name="textForDeleteButton">Delete</string>
     <string name="textForSaveButton">Save</string>

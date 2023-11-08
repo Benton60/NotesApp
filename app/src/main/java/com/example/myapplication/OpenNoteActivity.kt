@@ -35,7 +35,6 @@ class OpenNoteActivity : AppCompatActivity() {
         setContentView(R.layout.activity_note)
         val btnSave = findViewById<Button>(R.id.btnSave)
         val btnDelete = findViewById<Button>(R.id.btnDelete)
-
         updateUserInfo()
 
         setText(loadThisNote(getNoteName()))
@@ -106,20 +105,41 @@ class OpenNoteActivity : AppCompatActivity() {
         edtNote.setText(note, TextView.BufferType.EDITABLE)
     }
     private fun saveThisNote(noteName: String): Boolean{
-        return try{
-            val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
-            val timeOutputWriter = OutputStreamWriter(timeFileStream)
-            timeOutputWriter.write(SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date()))
-            timeOutputWriter.close()
+        val edtNoteName = findViewById<EditText>(R.id.edtNoteName)
+        if(edtNoteName.text.toString() + ".note" == noteName){
+            return try{
+                val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
+                val timeOutputWriter = OutputStreamWriter(timeFileStream)
+                timeOutputWriter.write(SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date()))
+                timeOutputWriter.close()
 
-            val fileOutputStream = openFileOutput(noteName, MODE_PRIVATE)
-            val outputWriter = OutputStreamWriter(fileOutputStream)
-            outputWriter.write(getText())
-            outputWriter.close()
-            true
-        }catch(e: IOException){
-            println(e)
-            false
+                val fileOutputStream = openFileOutput(noteName, MODE_PRIVATE)
+                val outputWriter = OutputStreamWriter(fileOutputStream)
+                outputWriter.write(getText())
+                outputWriter.close()
+                true
+            }catch(e: IOException){
+                println(e)
+                false
+            }
+        }else{
+            return try{
+                val timeFileStream = openFileOutput("lastTime.tim", MODE_PRIVATE)
+                val timeOutputWriter = OutputStreamWriter(timeFileStream)
+                timeOutputWriter.write(SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(Date()))
+                timeOutputWriter.close()
+
+                val fileOutputStream = openFileOutput(edtNoteName.text.toString() + ".note", MODE_PRIVATE)
+                val outputWriter = OutputStreamWriter(fileOutputStream)
+                outputWriter.write(getText())
+                outputWriter.close()
+
+                deleteFile(getNoteName())
+                true
+            }catch(e: IOException){
+                println(e)
+                false
+            }
         }
     }
     private fun deleteThisNote(noteName: String): Boolean{
@@ -145,6 +165,9 @@ class OpenNoteActivity : AppCompatActivity() {
         checkUserLoginInfo()
         currentUser.name = loadThisNote("userUsername.usr")
         currentUser.password = loadThisNote("userPassword.usr")
+        val edtNoteName = findViewById<EditText>(R.id.edtNoteName)
+        edtNoteName.setText(getNoteName().replace(".note", ""))
+
 
         val notesToAddToUser = hashMapOf<String, Any>(
             " " to " "
