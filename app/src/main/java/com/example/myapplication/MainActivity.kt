@@ -39,9 +39,6 @@ class MainActivity : AppCompatActivity() {
         val btnBigBoi = findViewById<Button>(R.id.btnBigBoi)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
         val ltvFilesList = findViewById<ListView>(R.id.ltvFilesList)
-
-
-
         ltvFilesList.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
             if(parent.getItemAtPosition(position).toString() != "") {
                 Intent(this, OpenNoteActivity::class.java).also {

@@ -1,52 +1,60 @@
 package com.example.myapplication
 
 import android.content.Context
-import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.InputStreamReader
 
-class SettingsActivity : AppCompatActivity() {
+class BugReportActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        val btnDeleteAccount = findViewById<Button>(R.id.btnDeleteAccount)
-        val btnBack = findViewById<Button>(R.id.btnSettingsBack)
-        val btnLogin = findViewById<Button>(R.id.btnLoginSettings)
-        val btnBugReport = findViewById<Button>(R.id.btnBugReport)
+        setContentView(R.layout.activity_bug_report)
+        val btnBackBug = findViewById<Button>(R.id.btnBackBug)
+        val btnSaveBug = findViewById<Button>(R.id.btnSaveBug)
+        val edtBugDescription = findViewById<EditText>(R.id.edtBugDescription)
 
-        checkUserLogin()
-
-        btnBugReport.setOnClickListener {
-            if(checkForInternet(this)){
-                Intent(this, BugReportActivity::class.java).also{
-                    startActivity(it)
-                }
+        btnSaveBug.setOnClickListener {
+            if(edtBugDescription.text.toString() != "") {
+                saveBug(edtBugDescription.text.toString())
             }else{
-                Toast.makeText(this, "Please connect to the internet to report a bug.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Please enter a valid bug", Toast.LENGTH_SHORT).show()
             }
-
         }
-        btnLogin.setOnClickListener {
-            login()
-        }
-        btnBack.setOnClickListener {
+        btnBackBug.setOnClickListener {
             finish()
         }
-        btnDeleteAccount.setOnClickListener {
-            Intent(this, DeleteAccount::class.java).also{
-                startActivity(it)
+    }
+    private fun saveBug(description: String) = CoroutineScope(Dispatchers.IO).launch{
+        withContext(Dispatchers.Main) {
+            if (!checkForInternet(this@BugReportActivity)) {
+                Toast.makeText(this@BugReportActivity, "Please connect to the internet to report a bug.", Toast.LENGTH_LONG).show()
+                finish()
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        checkUserLogin()
+        val bugRef = Firebase.firestore.collection("Bugs")
+        val bug = hashMapOf<String, Any>(
+            "bug" to description,
+            "Username" to loadThisNote("userUsername.usr")
+        )
+        bugRef.add(bug).await()
+        withContext(Dispatchers.Main){
+            Toast.makeText(this@BugReportActivity, "Thank you for your Support!", Toast.LENGTH_LONG).show()
+        }
+        finish()
     }
     private fun checkForInternet(context: Context): Boolean {
         // register activity with the connectivity manager service
@@ -85,18 +93,15 @@ class SettingsActivity : AppCompatActivity() {
             return networkInfo.isConnected
         }
     }
-    private fun login(){
-        Intent(this, LoginActivity::class.java).also{
-            startActivity(it)
+    private fun loadThisNote(noteName: String): String {
+        return try {
+            val fileInputStream = openFileInput(noteName)
+            val inputReader = InputStreamReader(fileInputStream)
+            val output = inputReader.readText()
+            output
+        }catch(e: IOException){
+            ""
         }
     }
-    private fun checkUserLogin(){
-        val btnLogin = findViewById<Button>(R.id.btnLoginSettings)
-        btnLogin.text = "Login"
-        filesDir.listFiles().filter {
-            it.name == "userPassword.usr"
-        }.forEach{
-            btnLogin.text = "Signed In"
-        }
-    }
+
 }
