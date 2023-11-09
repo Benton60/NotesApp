@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:text="Delete My Account"
                 android:visibility="visible"
+                android:textSize="20dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp" />
 
@@ -39,6 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Report a bug"
+                android:textSize="20dp"
                 tools:layout_editor_absoluteX="51dp"
                 tools:layout_editor_absoluteY="82dp"
                 android:layout_marginStart="10dp"
@@ -74,6 +76,7 @@
                 android:layout_centerInParent="true"
                 android:backgroundTint="@color/grey"
                 android:text="Back"
+                android:textSize="30dp"
                 android:textColor="@color/black" />
 
 
@@ -85,8 +88,9 @@
                 android:layout_marginEnd="10dp"
                 android:backgroundTint="@color/grey"
                 android:text="Login"
+                android:textSize="30dp"
                 android:textColor="@color/black"
-                android:textSize="12sp" />
+                />
 
 
 
