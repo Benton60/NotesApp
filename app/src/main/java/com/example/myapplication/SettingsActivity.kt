@@ -99,4 +99,5 @@ class SettingsActivity : AppCompatActivity() {
             btnLogin.text = "Signed In"
         }
     }
+
 }

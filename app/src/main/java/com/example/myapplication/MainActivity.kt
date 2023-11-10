@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -28,7 +29,7 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class MainActivity : AppCompatActivity() {
-    var serverTime = ""
+    var serverTime = "020000000000000000000000000"
     private val usersRef = Firebase.firestore.collection("users")
     private var isfinished = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,16 +74,18 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         showFiles()
     }
-    private fun showFiles(){
+    private fun showFiles() = CoroutineScope(Dispatchers.IO).launch {
         //var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
         //btnbigboi.text = isServerTimeHigher().toString()
-        pullServerTime()
-        if(checkForInternet(this) && isServerTimeHigher()){
-            pullFilesFromServer()
-        }else{
-            userIsAhead()
+        withContext(Dispatchers.Main) {
+            pullServerTime().join()
+            if (checkForInternet(this@MainActivity) && (isServerTimeHigher() || isFirstTimeWithThisAccount())) {
+                pullFilesFromServer()
+            } else {
+                userIsAhead()
+                }
+            pullFilesFromLocalMachine()
         }
-        pullFilesFromLocalMachine()
     }
     private fun checkForInternet(context: Context): Boolean {
         // register activity with the connectivity manager service
@@ -186,26 +189,23 @@ class MainActivity : AppCompatActivity() {
                 serverTime = document.get("lastTime").toString()
             }
         }catch(e: Exception){
-            serverTime = "Not Signed In"
+            serverTime = "not higher"
         }
         isfinished = true
     }
     private fun isServerTimeHigher(): Boolean{
-        if(pullServerTime().isActive){
-            return false
-        }
-        var localTime = "00000000000000000000"
+        var localTime = ""
         filesDir.listFiles().filter{
             it.extension == "tim"
         }.forEach{
             localTime = loadThisNote(it.name)
         }
         try{
-            return if(serverTime.substring(6,10).toInt() > localTime.substring(6,10).toInt()){
+            return if(serverTime.substring(6, 10).toInt() > localTime.substring(6, 10).toInt()){
                 true
-            }else if(serverTime.substring(3,5).toInt() > localTime.substring(3,5).toInt()){
+            }else if(serverTime.substring(3, 5).toInt() > localTime.substring(3, 5).toInt()){
                 true
-            }else if(serverTime.substring(0,2).toInt() > localTime.substring(0,2).toInt()){
+            }else if(serverTime.substring(0, 2).toInt() > localTime.substring(0, 2).toInt()){
                 true
             }else if(serverTime.substring(11, 13).toInt() > localTime.substring(11, 13).toInt()){
                 true
@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                 false
             }
         }catch(e: Exception){
+            Log.e("try catch failure", e.toString())
             return false
         }
     }
@@ -273,6 +274,16 @@ class MainActivity : AppCompatActivity() {
         }
         notes.remove(" ")
         return notes
+    }
+    private fun isFirstTimeWithThisAccount(): Boolean{
+
+        return if(loadThisNote("userUsername.usr") == loadThisNote("userLastUsed.sys")){
+            false
+        }else filesDir.listFiles().filter {
+                it.exists()
+                it.isFile
+                it.name =="userLastUsed.sys"
+            }.isNotEmpty()
     }
 }
 

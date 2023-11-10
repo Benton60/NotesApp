@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class LoginActivity : AppCompatActivity() {
@@ -70,6 +71,11 @@ class LoginActivity : AppCompatActivity() {
             outputWriter.write(edtPassword.text.toString())
             outputWriter.close()
 
+            val fileOutputStream3 = openFileOutput("userLastUsed.sys", MODE_PRIVATE)
+            val outputWriter3 = OutputStreamWriter(fileOutputStream3)
+            outputWriter3.write(loadThisNote("userUsername.usr"))
+            outputWriter3.close()
+
             val fileOutputStream2 = openFileOutput("userUsername.usr", MODE_PRIVATE)
             val outputWriter2 = OutputStreamWriter(fileOutputStream2)
             outputWriter2.write(edtUsername.text.toString())
@@ -82,9 +88,18 @@ class LoginActivity : AppCompatActivity() {
         try {
             deleteFile("userPassword.usr")
             deleteFile("userUsername.usr")
-            deleteFile("userLastUsed.sys")
         }catch(e: Exception){
             println(e)
+        }
+    }
+    private fun loadThisNote(noteName: String): String {
+        return try {
+            val fileInputStream = openFileInput(noteName)
+            val inputReader = InputStreamReader(fileInputStream)
+            val output = inputReader.readText()
+            output
+        }catch(e: IOException){
+            ""
         }
     }
 }
