@@ -29,9 +29,8 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class MainActivity : AppCompatActivity() {
-    var serverTime = "020000000000000000000000000"
+    var serverTime = ""
     private val usersRef = Firebase.firestore.collection("users")
-    private var isfinished = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -79,11 +78,13 @@ class MainActivity : AppCompatActivity() {
         //btnbigboi.text = isServerTimeHigher().toString()
         withContext(Dispatchers.Main) {
             pullServerTime().join()
-            if (checkForInternet(this@MainActivity) && (isServerTimeHigher() || isFirstTimeWithThisAccount())) {
+            var btnbigboi = findViewById<Button>(R.id.btnBigBoi)
+            btnbigboi.text = isServerTimeHigher().toString()
+            if (checkForInternet(this@MainActivity) && isServerTimeHigher()) {
                 pullFilesFromServer()
             } else {
                 userIsAhead()
-                }
+            }
             pullFilesFromLocalMachine()
         }
     }
@@ -191,10 +192,9 @@ class MainActivity : AppCompatActivity() {
         }catch(e: Exception){
             serverTime = "not higher"
         }
-        isfinished = true
     }
     private fun isServerTimeHigher(): Boolean{
-        var localTime = ""
+        var localTime = "00000000000000000000000000"
         filesDir.listFiles().filter{
             it.extension == "tim"
         }.forEach{
@@ -274,16 +274,6 @@ class MainActivity : AppCompatActivity() {
         }
         notes.remove(" ")
         return notes
-    }
-    private fun isFirstTimeWithThisAccount(): Boolean{
-
-        return if(loadThisNote("userUsername.usr") == loadThisNote("userLastUsed.sys")){
-            false
-        }else filesDir.listFiles().filter {
-                it.exists()
-                it.isFile
-                it.name =="userLastUsed.sys"
-            }.isNotEmpty()
     }
 }
 
